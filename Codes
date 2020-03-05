@@ -1,0 +1,56 @@
+#include <ESP8266WiFi.h>     // esp8266 library
+#include <FirebaseArduino.h>
+#include <Blynk.h>
+#include <WiFi.h>
+#include <BlynkSimpleEsp8266.h>
+#define FIREBASE_HOST "wearable-smart-aid-for-blind.firebaseio.com"// the project name address from firebase id
+#define FIREBASE_AUTH "AIzaSyCiMdhNRak7vZjE2rWc1zeo5grn3Vh5rII" // the secret key generated from firebase
+#define WIFI_SSID "JADOGENTIL"
+#define WIFI_PASSWORD "Colibri123"
+#define BLYNK_PRINT Serial
+#define TRIGGERPIN 13
+#define ECHOPIN    12
+int Buzzer = 8;  
+char auth[] = "Z3WyRRyNB1cf67bK-V74UHWqTJzdhD7";
+
+WidgetLCD lcd(V1);
+
+void setup()
+{
+  // Debug console
+  Serial.begin(115200);
+  pinMode(TRIGGERPIN, OUTPUT);
+  pinMode(ECHOPIN, INPUT);
+   pinMode(Buzzer, OUTPUT);
+   Blynk.begin(AUTH, SSID, PASSWORD);
+  Serial.println();
+  Serial.print("Connected to ");
+  Serial.println(WiFi_SSID);
+  Serial.print("IP Address is : ");
+  Serial.println(WiFi.localIP());                                            //print local IP address
+  Firebase.begin(FIREBASE_HOST,FIREBASE_AUTH); // connect to fir
+  lcd.clear(); //Use it to clear the LCD Widget
+  lcd.print(0, 0, "Distance in cm"); // use: (position X: 0-15, position Y: 0-1, "Message you want to print")
+  } 
+  void loop()
+{
+  lcd.clear();
+  lcd.print(0, 0, "Distance in cm"); // use: (position X: 0-15, position Y: 0-1, "Message you want to print")
+  long duration, distance;
+  digitalWrite(TRIGGERPIN, LOW);  
+  delayMicroseconds(3); 
+  
+  digitalWrite(TRIGGERPIN, HIGH);
+  delayMicroseconds(12); 
+  
+  digitalWrite(TRIGGERPIN, LOW);
+  duration = pulseIn(ECHOPIN, HIGH);
+  distance = (duration/2) / 29.1;
+  Serial.print(distance);
+  Serial.println("Cm");
+  lcd.print(7, 1, distance);
+  Blynk.run();
+  Firebase.pushString("/Sensor/",obstacle_detected);
+  delay(500);
+
+}
